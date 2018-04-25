@@ -1,0 +1,11 @@
+<component name="libraryTable">
+  <library name="Gradle: org.bboxdb:bboxdb-commons:0.6.0">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.bboxdb/bboxdb-commons/0.6.0/4c40f4dd21dfcc9f16e4657ec16caa32b654ec00/bboxdb-commons-0.6.0.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.bboxdb/bboxdb-commons/0.6.0/10617dbe3d95c4cbe0ec8f3b21ac56ce598bac4f/bboxdb-commons-0.6.0-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

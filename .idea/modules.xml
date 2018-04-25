@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/crypto-exch-arb.iml" filepath="$PROJECT_DIR$/crypto-exch-arb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/crypto-exch-arb_main.iml" filepath="$PROJECT_DIR$/.idea/modules/crypto-exch-arb_main.iml" group="crypto-exch-arb" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/crypto-exch-arb_test.iml" filepath="$PROJECT_DIR$/.idea/modules/crypto-exch-arb_test.iml" group="crypto-exch-arb" />
+      <module fileurl="file://$PROJECT_DIR$/marketdata/marketdata.iml" filepath="$PROJECT_DIR$/marketdata/marketdata.iml" group="marketdata" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/marketdata/marketdata_main.iml" filepath="$PROJECT_DIR$/.idea/modules/marketdata/marketdata_main.iml" group="marketdata" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/marketdata/marketdata_test.iml" filepath="$PROJECT_DIR$/.idea/modules/marketdata/marketdata_test.iml" group="marketdata" />
+    </modules>
+  </component>
+</project>

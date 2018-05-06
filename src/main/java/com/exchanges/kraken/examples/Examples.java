@@ -27,6 +27,6 @@ public class Examples {
         result.stream().forEach(
                 q -> System.out.println(q)
         );
-
+*/
     }
 }

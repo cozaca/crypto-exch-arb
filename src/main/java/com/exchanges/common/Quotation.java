@@ -1,4 +1,10 @@
-package com.exchanges.kraken.MarketData;
+package com.exchanges.common;
 
-public class Quotation {
+import java.math.BigDecimal;
+
+public interface Quotation {
+
+    BigDecimal getPrice();
+    BigDecimal getVolume();
+    Long getTimeStamp();
 }

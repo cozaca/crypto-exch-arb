@@ -1,22 +1,20 @@
-package com.exchanges.kraken;
+package com.exchanges.kraken.examples;
 
-/*import main.java.com.kraken.MarketData.MarketDataParser;
-import main.java.com.kraken.MarketData.Quotation;
-import main.java.com.kraken.api.KrakenApi;
-import main.java.com.kraken.api.KrakenApi.Method;
+import com.exchanges.common.Quotation;
+import com.exchanges.kraken.MarketData.MarketDataParser;
+import com.exchanges.kraken.api.KrakenApi;
+import com.exchanges.kraken.api.KrakenApi.Method;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;*/
+import java.util.Map;
 
 public class Examples {
 
-    public static void main(String[] args)/* throws IOException, InvalidKeyException, NoSuchAlgorithmException*/ {
+    public static void main(String[] args) throws IOException {
 
-      /*  KrakenApi api = new KrakenApi();
+        KrakenApi api = new KrakenApi();
 
         String response;
         Map<String, String> input = new HashMap<>();
@@ -27,6 +25,5 @@ public class Examples {
         result.stream().forEach(
                 q -> System.out.println(q)
         );
-*/
     }
 }

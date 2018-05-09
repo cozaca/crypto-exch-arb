@@ -1,32 +1,35 @@
-package com.exchanges.kraken;
+package com.exchanges.kraken.examples;
 
-/*import main.java.com.kraken.MarketData.MarketDataParser;
-import main.java.com.kraken.MarketData.Quotation;
-import main.java.com.kraken.api.KrakenApi;
-import main.java.com.kraken.api.KrakenApi.Method;
+import com.exchanges.common.Ask;
+import com.exchanges.common.Bid;
+import com.exchanges.common.Tuple;
+import com.exchanges.kraken.api.KrakenApi;
+import com.exchanges.kraken.api.KrakenApi.Method;
+import com.exchanges.kraken.parser.MarketDataParser;
 
 import java.io.IOException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;*/
+import java.util.Map;
 
 public class Examples {
 
-    public static void main(String[] args)/* throws IOException, InvalidKeyException, NoSuchAlgorithmException*/ {
+    public static void main(String[] args) throws IOException {
 
-      /*  KrakenApi api = new KrakenApi();
+        KrakenApi api = new KrakenApi();
 
         String response;
         Map<String, String> input = new HashMap<>();
 
         input.put("pair", "XBTEUR");
         response = api.queryPublic(Method.DEPTH, input);
-        List<Quotation> result = MarketDataParser.parse(response);
-        result.stream().forEach(
-                q -> System.out.println(q)
+        Tuple<List<Bid>, List<Ask>> tuple = MarketDataParser.parse(response);
+        tuple.x.stream().forEach(
+            q -> System.out.println(q)
         );
-*/
+        tuple.y.stream().forEach(
+            q -> System.out.println(q)
+        );
+
     }
 }

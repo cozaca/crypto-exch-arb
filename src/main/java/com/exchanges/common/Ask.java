@@ -29,10 +29,8 @@ public class Ask implements Quotation {
         return timeStamp;
     }
 
-
     @Override
     public String toString() {
         return "ASK: " + getPrice() + " " + getVolume() + " " + getTimeStamp();
     }
-
 }

@@ -6,10 +6,7 @@ import com.exchanges.common.Quotation;
 import com.exchanges.common.Tuple;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -23,46 +20,27 @@ public class MarketDataParser {
     private static final Pattern asksPattern = Pattern.compile(asksRegex, Pattern.MULTILINE);
     private static final Pattern bidsPattern = Pattern.compile(bidsRegex, Pattern.MULTILINE);
 
-    private static final Comparator<Bid> bidComparator = (bid1, bid2) -> {
-        int priceComparison = bid1.getPrice().compareTo(bid2.getPrice());
-        if (priceComparison < 0) {
-            return -1;
-        } else {
-            return bid1.getTimeStamp().compareTo(bid2.getTimeStamp());
-        }
-    };
+    public static Tuple<Set<Bid>, Set<Ask>> parse(String response) {
+        Set<Bid> bids = new TreeSet<>(Bid.comparator);
+        Set<Ask> asks = new TreeSet<>(Ask.comparator);
 
-    private static final Comparator<Ask> askComparator = (ask1, ask2) -> {
-        int priceComparison = ask1.getPrice().compareTo(ask2.getPrice());
-        if (priceComparison < 0) {
-            return -1;
-        } else {
-            return ask1.getTimeStamp().compareTo(ask2.getTimeStamp());
-        }
-    };
+        bids.addAll(convert(bidsPattern.matcher(response), values -> new Bid(parseBigDecimal(values[0]), parseBigDecimal(values[1]), parseLong(values[2]))));
+        asks.addAll(convert(asksPattern.matcher(response), values -> new Ask(parseBigDecimal(values[0]), parseBigDecimal(values[1]), parseLong(values[2]))));
 
-    public static Tuple<List<Bid>, List<Ask>> parse(String response) {
-        final Matcher asksMatcher = asksPattern.matcher(response);
-        final Matcher bidsMatcher = bidsPattern.matcher(response);
-
-        List<Bid> bids = convert(bidsMatcher, values -> new Bid(parseBigDecimal(values[0]), parseBigDecimal(values[1]), parseLong(values[2])));
-        List<Ask> asks = convert(asksMatcher, values -> new Ask(parseBigDecimal(values[0]), parseBigDecimal(values[1]), parseLong(values[2])));
-        bids.sort(bidComparator);
-        asks.sort(askComparator);
         return new Tuple(bids, asks);
     }
 
-    private static <T extends Quotation> List<T> convert(Matcher asksMatcher, Function<String[], T> f) {
+    private static <T extends Quotation> Set<T> convert(Matcher asksMatcher, Function<String[], T> f) {
         while (asksMatcher.find()) {
             String asksRaw = asksMatcher.group(0).replace("],[", "];[");
             return Arrays.stream(asksRaw.split(";"))
                     .map(askRaw -> askRaw.replace("]", "").replace("[", ""))
                     .map(askRaw -> askRaw.split(","))
                     .map(values -> f.apply(values))
-                    .collect(Collectors.toList());
+                    .collect(Collectors.toSet());
 
         }
-        return new ArrayList<>();
+        return new HashSet<>();
     }
 
     private static Long parseLong(String value) {

@@ -1,4 +1,33 @@
-/build
+### Gradle ###
 .gradle
-.iml
-.idea
+build/
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.gradletasknamecache
+
+# User-specific stuff:
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/dictionaries
+.idea/vcs.xml
+.idea/dataSources.ids
+.idea/dataSources.xml
+.idea/dataSources.local.xml
+.idea/sqlDataSources.xml
+.idea/dynamic.xml
+.idea/uiDesigner.xml
+.idea/gradle.xml
+.idea/modules.xml
+.idea/libraries
+.idea/mongoSettings.xml
+.idea/
+
+out/
+
+.idea_modules/
+
+*.iml
+modules.xml

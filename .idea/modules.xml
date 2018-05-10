@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/crypto-exch-arb.iml" filepath="$PROJECT_DIR$/crypto-exch-arb.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/marketdata/crypto-exch-arb-marketdata.iml" filepath="$PROJECT_DIR$/.idea/modules/marketdata/crypto-exch-arb-marketdata.iml" group="marketdata" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/crypto-exch-arb_main.iml" filepath="$PROJECT_DIR$/.idea/modules/crypto-exch-arb_main.iml" group="crypto-exch-arb" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/crypto-exch-arb_test.iml" filepath="$PROJECT_DIR$/.idea/modules/crypto-exch-arb_test.iml" group="crypto-exch-arb" />
       <module fileurl="file://$PROJECT_DIR$/marketdata/marketdata.iml" filepath="$PROJECT_DIR$/marketdata/marketdata.iml" group="marketdata" />

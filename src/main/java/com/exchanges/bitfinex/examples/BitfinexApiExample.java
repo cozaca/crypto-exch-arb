@@ -11,6 +11,8 @@ public class BitfinexApiExample {
     public static void main(String[] args)
     {
         BitfinexApi bitfinexApi = new BitfinexApi();
-        bitfinexApi.subscribeCandleStickBySymbol(BitfinexCurrencyPair.BTC_EUR, Timeframe.MINUTES_1);
+   //     bitfinexApi.subscribeCandleStickBySymbol(BitfinexCurrencyPair.BTC_EUR, Timeframe.MINUTES_1);
+        bitfinexApi.subscribeTickerStreamBySymbol(BitfinexCurrencyPair.BTC_EUR);
+        bitfinexApi.subscribeOrderBookStreamBySymbol(BitfinexCurrencyPair.BTC_EUR);
     }
 }

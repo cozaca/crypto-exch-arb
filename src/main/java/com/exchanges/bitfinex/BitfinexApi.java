@@ -5,18 +5,24 @@ import com.github.jnidzwetzki.bitfinex.v2.BitfinexConnectionFeature;
 import com.github.jnidzwetzki.bitfinex.v2.SequenceNumberAuditor;
 import com.github.jnidzwetzki.bitfinex.v2.entity.*;
 import com.github.jnidzwetzki.bitfinex.v2.entity.symbol.BitfinexCandlestickSymbol;
+import com.github.jnidzwetzki.bitfinex.v2.entity.symbol.BitfinexStreamSymbol;
 import com.github.jnidzwetzki.bitfinex.v2.entity.symbol.BitfinexTickerSymbol;
 import com.github.jnidzwetzki.bitfinex.v2.manager.ConnectionFeatureManager;
 import com.github.jnidzwetzki.bitfinex.v2.manager.OrderbookManager;
 import com.github.jnidzwetzki.bitfinex.v2.manager.QuoteManager;
+import com.google.common.collect.HashBasedTable;
+import com.google.common.collect.Table;
 
 import java.util.function.BiConsumer;
+
+import static com.exchanges.bitfinex.SubscriptionType.*;
 
 public class BitfinexApi {
 
     private final BitfinexApiBroker connectionBroker;
     private final QuoteManager quoteManager;
     private final OrderbookManager orderbookManager;
+    private final Table<SubscriptionType, BitfinexCurrencyPair, BitfinexStreamSymbol> subscribedSymbols;
 
     public BitfinexApi() {
         connectionBroker = BitFinexConnection.getConnection();
@@ -24,9 +30,10 @@ public class BitfinexApi {
         setBasicConfiguration(connectionBroker);
         quoteManager = connectionBroker.getQuoteManager();
         orderbookManager = connectionBroker.getOrderbookManager();
+        subscribedSymbols = HashBasedTable.create();
     }
 
-    public void connect()  {
+    public void connect() {
         try {
             connectionBroker.connect();
         } catch (APIException e) {
@@ -34,29 +41,19 @@ public class BitfinexApi {
         }
     }
 
-    public ConnectionCapabilities getCapabilities() {
-        return connectionBroker.getCapabilities();
-    }
-
     private void setBasicConfiguration(BitfinexApiBroker connectionBroker) {
-        final ConnectionFeatureManager cfManager = connectionBroker.getConnectionFeatureManager();
+        ConnectionFeatureManager cfManager = connectionBroker.getConnectionFeatureManager();
 
-        final SequenceNumberAuditor sequenceNumberAuditor = connectionBroker.getSequenceNumberAuditor();
+        SequenceNumberAuditor sequenceNumberAuditor = connectionBroker.getSequenceNumberAuditor();
         sequenceNumberAuditor.setErrorPolicy(SequenceNumberAuditor.ErrorPolicy.LOG_ONLY);
 
         cfManager.enableConnectionFeature(BitfinexConnectionFeature.SEQ_ALL);
     }
 
-    public void subscribeCandleStickBySymbol(BitfinexCurrencyPair currencyPair, Timeframe timeframe) {
-        final BitfinexCandlestickSymbol symbol
+    public void subscribeCandleStickBySymbol(BitfinexCurrencyPair currencyPair, Timeframe timeframe, BiConsumer<BitfinexCandlestickSymbol, BitfinexTick> callback) {
+        BitfinexCandlestickSymbol symbol
                 = new BitfinexCandlestickSymbol(currencyPair, timeframe);
-
-        // The consumer will be called on all received candles for the symbol
-        final BiConsumer<BitfinexCandlestickSymbol, BitfinexTick> callback = (sy, tick) -> {
-            System.out.format("Got BitfinexTick (%s) for symbol (%s)\n", tick, sy);
-
-        };
-
+        subscribedSymbols.put(CANDLE_STICK, currencyPair, symbol);
         try {
             quoteManager.registerCandlestickCallback(symbol, callback);
         } catch (APIException e) {
@@ -66,11 +63,12 @@ public class BitfinexApi {
     }
 
     public void subscribeTickerStreamBySymbol(BitfinexCurrencyPair currencyPair) {
-        final BitfinexTickerSymbol symbol
+        BitfinexTickerSymbol symbol
                 = new BitfinexTickerSymbol(currencyPair);
 
+        subscribedSymbols.put(TICKER_STREAM, currencyPair, symbol);
         // The consumer will be called on all received candles for the symbol
-        final BiConsumer<BitfinexTickerSymbol, BitfinexTick> callback = (sy, tick) -> {
+        BiConsumer<BitfinexTickerSymbol, BitfinexTick> callback = (sy, tick) -> {
             System.out.format("Got BitfinexTickerStream (%s) for symbol (%s)\n", tick, sy);
 
         };
@@ -86,12 +84,13 @@ public class BitfinexApi {
 
 
     public void subscribeOrderBookStreamBySymbol(BitfinexCurrencyPair currencyPair) {
-        final OrderbookConfiguration  orderbookConfiguration
+        OrderbookConfiguration orderbookConfiguration
                 = new OrderbookConfiguration(currencyPair, OrderBookPrecision.P0, OrderBookFrequency.F0, 25);
 
-        final BiConsumer<OrderbookConfiguration, OrderbookEntry> callback = (orderbookConfig, entry) -> {
+        subscribedSymbols.put(ORDER_BOOK_STREAM, currencyPair, orderbookConfiguration);
+        BiConsumer<OrderbookConfiguration, OrderbookEntry> callback = (orderbookConfig, entry) -> {
             System.out.format("Got entry (%s) for orderbook (%s)\n", entry, orderbookConfig);
-            
+
         };
         try {
             orderbookManager.registerOrderbookCallback(orderbookConfiguration, callback);
@@ -102,7 +101,8 @@ public class BitfinexApi {
         orderbookManager.subscribeOrderbook(orderbookConfiguration);
     }
 
-    public void unsubscribeCandleStickBySymbol(BitfinexCandlestickSymbol symbol, BiConsumer<BitfinexCandlestickSymbol, BitfinexTick> callback){
+    public void unsubscribeCandleStickBySymbol(BitfinexCurrencyPair currencyPair, Timeframe timeframe, BiConsumer<BitfinexCandlestickSymbol, BitfinexTick> callback) {
+        BitfinexCandlestickSymbol symbol = (BitfinexCandlestickSymbol) subscribedSymbols.get(CANDLE_STICK, currencyPair);
         try {
             quoteManager.removeCandlestickCallback(symbol, callback);
         } catch (APIException e) {
@@ -111,7 +111,8 @@ public class BitfinexApi {
         quoteManager.unsubscribeCandles(symbol);
     }
 
-    public void unsubscribeStickStreamBySymbol(BitfinexTickerSymbol symbol, BiConsumer<BitfinexTickerSymbol, BitfinexTick> callback){
+    public void unsubscribeStickStreamBySymbol(BitfinexCurrencyPair currencyPair, BiConsumer<BitfinexTickerSymbol, BitfinexTick> callback) {
+        BitfinexTickerSymbol symbol = (BitfinexTickerSymbol) subscribedSymbols.get(TICKER_STREAM, currencyPair);
         try {
             quoteManager.removeTickCallback(symbol, callback);
         } catch (APIException e) {
@@ -120,13 +121,16 @@ public class BitfinexApi {
         quoteManager.unsubscribeTicker(symbol);
     }
 
-    public void unsubscribeOrderBookStreamBySymbol(OrderbookConfiguration symbol, BiConsumer<OrderbookConfiguration, OrderbookEntry> callback){
+    public void unsubscribeOrderBookStreamBySymbol(BitfinexCurrencyPair currencyPair, BiConsumer<OrderbookConfiguration, OrderbookEntry> callback) {
+        OrderbookConfiguration orderbookConfiguration
+                = (OrderbookConfiguration) subscribedSymbols.get(SubscriptionType.ORDER_BOOK_STREAM, currencyPair);
+
         try {
-            orderbookManager.registerOrderbookCallback(symbol, callback);
+            orderbookManager.registerOrderbookCallback(orderbookConfiguration, callback);
         } catch (APIException e) {
             e.printStackTrace();
         }
-        orderbookManager.unsubscribeOrderbook(symbol);
+        orderbookManager.unsubscribeOrderbook(orderbookConfiguration);
     }
 
 

@@ -10,5 +10,6 @@ dependencies {
 
     compile 'org.slf4j:slf4j-api:1.7.25'
     compile 'com.github.jnidzwetzki:bitfinex-v2-wss-api:0.6.4'
+    compile group: 'com.google.guava', name: 'guava', version: '19.0'
     testCompile 'junit:junit:4.12'
 }

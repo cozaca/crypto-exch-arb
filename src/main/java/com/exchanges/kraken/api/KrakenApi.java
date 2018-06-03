@@ -1,16 +1,33 @@
 package com.exchanges.kraken.api;
 
+import com.exchanges.common.Ask;
+import com.exchanges.common.Bid;
+import com.exchanges.common.Quotation;
+import com.exchanges.common.Tuple;
+
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class KrakenApi {
 
     private static final String OTP = "otp";
     private static final String NONCE = "nonce";
     private static final String MICRO_SECONDS = "000";
+
+    private static final String asksRegex = "(?<=\"asks\":\\[)(.*)(?=\\],\"bids\")";
+    private static final String bidsRegex = "(?<=\"bids\":\\[)(.*)(?=\\]\\}}\\})";
+
+    private static final Pattern asksPattern = Pattern.compile(asksRegex, Pattern.MULTILINE);
+    private static final Pattern bidsPattern = Pattern.compile(bidsRegex, Pattern.MULTILINE);
+
+    private static final Map<String, String> parameters = new HashMap<>();
 
     /** The API key. */
     private String key;
@@ -138,6 +155,50 @@ public class KrakenApi {
      */
     public void setSecret(String secret) {
         this.secret = secret;
+    }
+
+    public Tuple<Set<Bid>, Set<Ask>> subscribeToDepth(String currencPair) {
+        parameters.put("pair", currencPair);
+        String rawMarketData;
+        try {
+            rawMarketData = queryPublic(Method.DEPTH, new HashMap<>());
+        } catch (IOException e) {
+            rawMarketData = "";
+        }
+        parameters.clear();;
+        return parse(rawMarketData);
+    }
+
+
+    private static Tuple<Set<Bid>, Set<Ask>> parse(String response) {
+        Set<Bid> bids = new TreeSet<>(Bid.comparator);
+        Set<Ask> asks = new TreeSet<>(Ask.comparator);
+
+        bids.addAll(convert(bidsPattern.matcher(response), values -> new Bid(parseBigDecimal(values[0]), parseBigDecimal(values[1]), parseLong(values[2]))));
+        asks.addAll(convert(asksPattern.matcher(response), values -> new Ask(parseBigDecimal(values[0]), parseBigDecimal(values[1]), parseLong(values[2]))));
+
+        return new Tuple(bids, asks);
+    }
+
+    private static <T extends Quotation> Set<T> convert(Matcher asksMatcher, Function<String[], T> f) {
+        while (asksMatcher.find()) {
+            String asksRaw = asksMatcher.group(0).replace("],[", "];[");
+            return Arrays.stream(asksRaw.split(";"))
+                    .map(askRaw -> askRaw.replace("]", "").replace("[", ""))
+                    .map(askRaw -> askRaw.split(","))
+                    .map(values -> f.apply(values))
+                    .collect(Collectors.toSet());
+
+        }
+        return new HashSet<>();
+    }
+
+    private static Long parseLong(String value) {
+        return new Long(value.replaceAll("\\\"", ""));
+    }
+
+    private static BigDecimal parseBigDecimal(String value) {
+        return new BigDecimal(value.replaceAll("\\\"", ""));
     }
 
     /**
